@@ -1,12 +1,6 @@
 {
-  "name": "RedNickname",
-  "description": "Adds a local red nickname to users via /setnickname",
-  "authors": [
-    {
-      "name": "Wpee2L",
-      "id": "1234567890"
-    }
-  ],
-  "main": "index.js",
-  "hash": "auto"
+  "name": "RedNick",
+  "description": "By Wpee2L",
+  "authors": [{"name": "Wpee2L"}],
+  "main": "index.js"
 }
