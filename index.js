@@ -1,50 +1,30 @@
-import { metro, patcher, storage, commands } from "@vendetta";
-import { React } from "@vendetta/metro/common";
+const { metro, patcher, storage } = vendetta;
+const { React } = metro.common;
 
 const MessageHeader = metro.find(m => m.default?.displayName === "MessageHeader");
 const { Text } = metro.common.Components;
+const ActionSheet = metro.find(m => m.default?.displayName === "ActionSheet" || m.ActionSheet);
 
-export default {
+const plugin = {
     onLoad: () => {
-        // Plugin by Wpee2L
-        const setNickCommand = commands.registerCommand({
-            name: "setnickname",
-            description: "Set local nick for a user (Wpee2L System)",
-            options: [
-                { name: "user", description: "Select user", type: 6, required: true },
-                { name: "nick", description: "Enter nickname", type: 3, required: true }
-            ],
-            execute: (args) => {
-                const userId = args[0].value;
-                const nickname = args[1].value;
-                storage[userId] = nickname;
-                return { content: "Wpee2L System: Nickname saved locally." };
-            }
-        });
-
-        const patch = patcher.after("default", MessageHeader, ([{ message }], res) => {
-            const customAlias = storage[message.author.id];
-            if (customAlias) {
+        // 1. إضافة اللقب الأحمر في الشات
+        plugin.unpatchHeader = patcher.after("default", MessageHeader, ([{ message }], res) => {
+            const customNick = storage[message.author.id];
+            if (customNick) {
                 const headerChildren = res.props.children[1].props.children;
                 headerChildren.push(
                     React.createElement(Text, {
-                        style: {
-                            color: "#FF0000",
-                            fontWeight: "bold",
-                            marginLeft: 4,
-                            fontSize: 12,
-                        }
-                    }, `[${customAlias}]`)
+                        style: { color: "#FF0000", fontWeight: "bold", marginLeft: 4, fontSize: 12 }
+                    }, `[${customNick}]`)
                 );
             }
         });
 
-        // Store for unloading
-        window.wpee2l_command = setNickCommand;
-        window.wpee2l_patch = patch;
+        // 2. تجربة تفعيل بدون أوامر (فقط تعديل الشات)
     },
     onUnload: () => {
-        if (window.wpee2l_command) window.wpee2l_command();
-        if (window.wpee2l_patch) window.wpee2l_patch();
+        plugin.unpatchHeader?.();
     }
 };
+
+export default plugin;
